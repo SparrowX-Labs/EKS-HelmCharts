@@ -1,0 +1,36 @@
+name: Helm Apply
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+    paths:
+      - "environments/**"
+      - ".github/workflows/**"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  detect-changes:
+    name: Detect changed files
+    uses: ./.github/workflows/detect-changes.yaml
+    if: github.event.pull_request.merged == true
+
+
+  dev-apply:
+    uses: ./.github/workflows/apply-template.yaml
+    needs: detect-changes
+    if: needs.detect-changes.outputs.dev == 'true'
+    with:
+      target-env: dev
+
+  prod-apply:
+    uses: ./.github/workflows/apply-template.yaml
+    needs: detect-changes
+    if: needs.detect-changes.outputs.prod == 'true'
+    with:
+      target-env: prod

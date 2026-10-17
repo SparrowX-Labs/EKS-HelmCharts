@@ -1,0 +1,98 @@
+helmDefaults:
+  wait: true
+  timeout: 600
+  atomic: true
+  cleanupOnFail: true
+
+repositories:
+  - name: eks
+    url: https://aws.github.io/eks-charts
+  - name: external-dns
+    url: https://kubernetes-sigs.github.io/external-dns/
+  - name: autoscaler
+    url: https://kubernetes.github.io/autoscaler
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
+  - name: external-secrets
+    url: https://charts.external-secrets.io
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+releases:
+  - name: aws-load-balancer-controller
+    namespace: kube-system
+    chart: eks/aws-load-balancer-controller
+    version: 3.6.0
+    disableValidationOnInstall: true
+    values:
+      - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
+        region: {{ requiredEnv "AWS_REGION" | quote }}
+        serviceAccount:
+          create: true
+          name: aws-load-balancer-controller
+
+  - name: external-dns
+    namespace: external-dns
+    createNamespace: true
+    chart: external-dns/external-dns
+    version: 1.23.0
+    values:
+      - provider:
+          name: aws
+        aws:
+          region: {{ requiredEnv "AWS_REGION" | quote }}
+        txtOwnerId: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
+        policy: upsert-only
+        sources:
+          - service
+          - ingress
+        serviceAccount:
+          create: true
+          name: external-dns
+
+  - name: cluster-autoscaler
+    namespace: kube-system
+    chart: autoscaler/cluster-autoscaler
+    version: 9.59.0
+    values:
+      - cloudProvider: aws
+        image:
+          tag: v1.36.1
+        awsRegion: {{ requiredEnv "AWS_REGION" | quote }}
+        autoDiscovery:
+          clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
+        serviceAccount:
+          create: true
+          name: cluster-autoscaler
+        rbac:
+          create: true
+
+  - name: metrics-server
+    namespace: kube-system
+    chart: metrics-server/metrics-server
+    version: 3.14.0
+    values:
+      - args:
+          - --kubelet-preferred-address-types=InternalIP,Hostname
+
+  - name: external-secrets
+    namespace: external-secrets
+    createNamespace: true
+    chart: external-secrets/external-secrets
+    version: 2.11.0
+    disableValidationOnInstall: true
+    values:
+      - installCRDs: true
+        serviceAccount:
+          create: true
+          name: external-secrets
+
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: 1.21.2
+    disableValidationOnInstall: true
+    values:
+      - crds:
+          enabled: true
