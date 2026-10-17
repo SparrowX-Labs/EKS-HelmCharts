@@ -1,0 +1,97 @@
+name: Helm Plan Template
+
+on:
+  workflow_call:
+    inputs:
+      target-env:
+        description: Environment dev or prod
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ vars.DEV_EKS_CLUSTER_NAME }}
+  TARGET_ENV: ${{ inputs.target-env }}
+
+jobs:
+  helm-plan:
+    name: Helm Plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate environment
+        run: |
+          if [[ "$TARGET_ENV" != "dev" && "$TARGET_ENV" != "prod" ]]; then
+            echo "Error: Invalid environment '$TARGET_ENV'. Allowed values: dev, prod."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ROLE_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure kubeconfig
+        run: |
+          set -euo pipefail
+          aws sts get-caller-identity
+          aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION"
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl auth can-i get pods --all-namespaces
+
+      - name: Setup Helmfile
+        uses: helmfile/helmfile-action@v2.4.8
+        with:
+          helmfile-version: v1.1.0
+          helm-version: v3.18.6
+          helm-plugins: https://github.com/databus23/helm-diff@v3.17.0
+          helmfile-args: --version
+
+      - name: Helmfile diff
+        run: |
+          set -euo pipefail
+          command -v helm
+          command -v helmfile
+          helm version --short
+          helmfile --version
+          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml diff | tee plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml diff | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml diff | tee -a plan.txt
+
+      - name: Add plan to summary
+        run: |
+          {
+            echo "## Helm $TARGET_ENV Plan"
+            echo
+            echo '```text'
+            cat plan.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+       
+      - name: Comment Helm Plan on PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Helm $TARGET_ENV Plan"
+            echo
+            echo '```text'
+            cat plan.txt
+            echo '```'
+          } > plan-comment.md
+
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body-file plan-comment.md

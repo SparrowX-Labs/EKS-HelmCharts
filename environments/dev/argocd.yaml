@@ -1,0 +1,29 @@
+helmDefaults:
+  wait: true
+  timeout: 600
+  atomic: true
+  cleanupOnFail: true
+
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: argocd
+    namespace: argocd
+    createNamespace: true
+    chart: argo/argo-cd
+    version: 10.10.5
+    values:
+      - server:
+          service:
+            type: ClusterIP
+          replicas: 1
+        repoServer:
+          replicas: 1
+        controller:
+          replicas: 1
+        applicationSet:
+          replicas: 1
+        redis-ha:
+          enabled: false
