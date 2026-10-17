@@ -99,14 +99,14 @@ releases:
       - crds:
           enabled: true
 
-- name: aws-storage-class
-  namespace: kube-system
-  chart: deliveryhero/aws-storage-class
-  version: 0.1.11
-  values:
-    - storage_classes:
-        gp3:
-          default: true
-          provisioner: ebs.csi.aws.com
-          type: gp3
-          volumeBindingMode: WaitForFirstConsumer
+  - name: aws-storage-class
+    namespace: kube-system
+    chart: deliveryhero/aws-storage-class
+    version: 0.1.11
+    values:
+      - storage_classes:
+          gp3:
+            default: true
+            provisioner: ebs.csi.aws.com
+            type: gp3
+            volumeBindingMode: WaitForFirstConsumer
