@@ -99,14 +99,22 @@ releases:
       - crds:
           enabled: true
 
-  - name: aws-storage-class
+  - name: storage-class
     namespace: kube-system
-    chart: deliveryhero/aws-storage-class
-    version: 0.1.11
+    chart: deliveryhero/k8s-resources
+    version: 0.8.2
     values:
-      - storage_classes:
-          gp3:
-            default: true
+      - CustomResources:
+          - name: gp3
+            apiVersion: storage.k8s.io/v1
+            kind: StorageClass
+            annotations:
+              storageclass.kubernetes.io/is-default-class: "true"
             provisioner: ebs.csi.aws.com
-            type: gp3
+            reclaimPolicy: Delete
             volumeBindingMode: WaitForFirstConsumer
+            allowVolumeExpansion: true
+            parameters:
+              type: gp3
+              encrypted: "true"
+              csi.storage.k8s.io/fstype: ext4
