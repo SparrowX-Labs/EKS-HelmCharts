@@ -52,6 +52,16 @@ jobs:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ROLE_NAME }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Resolve EKS VPC ID
+        run: |
+          set -euo pipefail
+          EKS_VPC_ID="$(aws eks describe-cluster \
+            --name "$EKS_CLUSTER_NAME" \
+            --region "$AWS_REGION" \
+            --query 'cluster.resourcesVpcConfig.vpcId' \
+            --output text)"
+          echo "EKS_VPC_ID=$EKS_VPC_ID" >> "$GITHUB_ENV"
+
       - name: Configure kubeconfig
         run: |
           set -euo pipefail

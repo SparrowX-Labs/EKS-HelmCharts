@@ -25,6 +25,7 @@ releases:
     values:
       - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
         region: {{ requiredEnv "AWS_REGION" | quote }}
+        vpcId: {{ requiredEnv "EKS_VPC_ID" | quote }}
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
@@ -48,23 +49,24 @@ releases:
           create: true
           name: external-dns
 
-  - name: cluster-autoscaler
-    namespace: kube-system
-    chart: autoscaler/cluster-autoscaler
-    version: 9.59.0
-    values:
-      - cloudProvider: aws
-        image:
-          tag: v1.36.1
-        awsRegion: {{ requiredEnv "AWS_REGION" | quote }}
-        autoDiscovery:
-          clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
+- name: cluster-autoscaler
+  namespace: kube-system
+  chart: autoscaler/cluster-autoscaler
+  version: 9.59.0
+  values:
+    - cloudProvider: aws
+      image:
+        tag: v1.36.1
+      awsRegion: {{ requiredEnv "AWS_REGION" | quote }}
+      autoDiscovery:
+        clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
+      rbac:
+        create: true
+        clusterScoped: true
         serviceAccount:
           create: true
           name: cluster-autoscaler
-        rbac:
-          create: true
-
+          
   - name: metrics-server
     namespace: kube-system
     chart: metrics-server/metrics-server
