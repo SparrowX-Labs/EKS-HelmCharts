@@ -15,9 +15,7 @@ repositories:
     url: https://charts.external-secrets.io
   - name: jetstack
     url: https://charts.jetstack.io
-  - name: deliveryhero
-    url: https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/
-
+  
 releases:
   - name: aws-load-balancer-controller
     namespace: kube-system
@@ -98,23 +96,3 @@ releases:
     values:
       - crds:
           enabled: true
-
-  - name: storage-class
-    namespace: kube-system
-    chart: deliveryhero/k8s-resources
-    version: 0.8.2
-    values:
-      - CustomResources:
-          - name: gp3
-            apiVersion: storage.k8s.io/v1
-            kind: StorageClass
-            annotations:
-              storageclass.kubernetes.io/is-default-class: "true"
-            provisioner: ebs.csi.aws.com
-            reclaimPolicy: Delete
-            volumeBindingMode: WaitForFirstConsumer
-            allowVolumeExpansion: true
-            parameters:
-              type: gp3
-              encrypted: "true"
-              csi.storage.k8s.io/fstype: ext4
