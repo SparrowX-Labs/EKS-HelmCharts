@@ -23,6 +23,7 @@ releases:
     namespace: kube-system
     chart: eks/aws-load-balancer-controller
     version: 3.6.0
+    disableValidationOnInstall: true
     values:
       - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
         region: {{ requiredEnv "AWS_REGION" | quote }}
@@ -79,6 +80,7 @@ releases:
     createNamespace: true
     chart: external-secrets/external-secrets
     version: 2.11.0
+    disableValidationOnInstall: true
     values:
       - installCRDs: true
         serviceAccount:
@@ -90,6 +92,7 @@ releases:
     createNamespace: true
     chart: jetstack/cert-manager
     version: 1.21.2
+    disableValidationOnInstall: true
     values:
       - crds:
           enabled: true
