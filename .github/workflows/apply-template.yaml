@@ -14,7 +14,6 @@ permissions:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
-  EKS_CLUSTER_NAME: ${{ vars.DEV_EKS_CLUSTER_NAME }}
   TARGET_ENV: ${{ inputs.target-env }}
 
 jobs:
@@ -24,11 +23,23 @@ jobs:
 
     steps:
       - name: Validate environment
+        env:
+          DEV_EKS_CLUSTER_NAME: ${{ vars.DEV_EKS_CLUSTER_NAME }}
+          PROD_EKS_CLUSTER_NAME: ${{ vars.PROD_EKS_CLUSTER_NAME }}
         run: |
+          set -euo pipefail
           if [[ "$TARGET_ENV" != "dev" && "$TARGET_ENV" != "prod" ]]; then
             echo "Error: Invalid environment '$TARGET_ENV'. Allowed values: dev, prod."
             exit 1
           fi
+
+          if [[ "$TARGET_ENV" == "dev" ]]; then
+            EKS_CLUSTER_NAME="$DEV_EKS_CLUSTER_NAME"
+          else
+            EKS_CLUSTER_NAME="$PROD_EKS_CLUSTER_NAME"
+          fi
+
+          echo "EKS_CLUSTER_NAME=$EKS_CLUSTER_NAME" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@v4
