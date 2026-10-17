@@ -71,6 +71,8 @@ jobs:
           helmfile-args: --version
 
       - name: Helmfile diff
+        env:
+          HELM_DIFF_OUTPUT: simple
         run: |
           set -euo pipefail
           command -v helm
