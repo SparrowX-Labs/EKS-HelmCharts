@@ -25,6 +25,7 @@ releases:
     values:
       - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
         region: {{ requiredEnv "AWS_REGION" | quote }}
+        vpcId: {{ requiredEnv "EKS_VPC_ID" | quote }}
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
@@ -59,11 +60,12 @@ releases:
         awsRegion: {{ requiredEnv "AWS_REGION" | quote }}
         autoDiscovery:
           clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
-        serviceAccount:
-          create: true
-          name: cluster-autoscaler
         rbac:
           create: true
+          clusterScoped: true
+          serviceAccount:
+            create: true
+            name: cluster-autoscaler
 
   - name: metrics-server
     namespace: kube-system
