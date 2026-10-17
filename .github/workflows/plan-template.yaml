@@ -66,9 +66,9 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml diff | tee plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml diff | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml diff | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff | tee plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff | tee -a plan.txt
 
       - name: Add plan to summary
         run: |

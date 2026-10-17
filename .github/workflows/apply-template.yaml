@@ -65,9 +65,9 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml sync | tee apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml sync | tee -a apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml sync | tee -a apply.txt
+          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl sync | tee apply.txt
+          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl sync | tee -a apply.txt
+          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl sync | tee -a apply.txt
 
       - name: Add apply to summary
         run: |
