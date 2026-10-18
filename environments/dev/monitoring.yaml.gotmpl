@@ -87,11 +87,6 @@ releases:
           prometheusSpec:
             replicas: 1
             retention: 7d
-            secrets:
-              - prometheus-web-config
-            additionalArgs:
-              - name: web.config.file
-                value: /etc/prometheus/secrets/prometheus-web-config/web.yml
             serviceMonitorSelectorNilUsesHelmValues: false
             storageSpec:
               volumeClaimTemplate:
@@ -102,14 +97,3 @@ releases:
                   resources:
                     requests:
                       storage: 20Gi
-        extraManifests:
-          - apiVersion: v1
-            kind: Secret
-            metadata:
-              name: prometheus-web-config
-              namespace: monitoring
-            type: Opaque
-            stringData:
-              web.yml: |-
-                basic_auth_users:
-                  {{ requiredEnv "PROMETHEUS_ADMIN_USER" | quote }}: {{ bcrypt (requiredEnv "PROMETHEUS_ADMIN_PASSWORD") | quote }}
