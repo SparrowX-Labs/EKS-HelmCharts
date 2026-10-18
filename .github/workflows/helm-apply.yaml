@@ -23,6 +23,7 @@ jobs:
 
   dev-apply:
     uses: ./.github/workflows/apply-template.yaml
+    secrets: inherit
     needs: detect-changes
     if: needs.detect-changes.outputs.dev == 'true'
     with:
@@ -30,6 +31,7 @@ jobs:
 
   prod-apply:
     uses: ./.github/workflows/apply-template.yaml
+    secrets: inherit
     needs: detect-changes
     if: needs.detect-changes.outputs.prod == 'true'
     with:

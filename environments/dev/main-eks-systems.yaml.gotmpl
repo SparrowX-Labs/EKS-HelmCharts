@@ -40,6 +40,9 @@ releases:
           name: aws
         aws:
           region: {{ requiredEnv "AWS_REGION" | quote }}
+          zoneType: public
+        domainFilters:
+          - {{ requiredEnv "PUBLIC_DNS_DOMAIN" | quote }}
         txtOwnerId: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
         policy: upsert-only
         sources:

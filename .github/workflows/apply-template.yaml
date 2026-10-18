@@ -80,6 +80,18 @@ jobs:
           helmfile-args: --version
 
       - name: Apply Helm releases
+        env:
+          ACM_CERTIFICATE_ARN: ${{ vars.ACM_CERTIFICATE_ARN }}
+          ARGOCD_PUBLIC_HOSTNAME: ${{ vars.ARGOCD_PUBLIC_HOSTNAME }}
+          ARGOCD_ADMIN_PASSWORD: ${{ secrets.ARGOCD_ADMIN_PASSWORD }}
+          ARGOCD_ADMIN_PASSWORD_MTIME: ${{ secrets.ARGOCD_ADMIN_PASSWORD_MTIME }}
+          GRAFANA_ADMIN_USER: ${{ vars.GRAFANA_ADMIN_USER }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+          GRAFANA_PUBLIC_HOSTNAME: ${{ vars.GRAFANA_PUBLIC_HOSTNAME }}
+          PROMETHEUS_ADMIN_USER: ${{ vars.PROMETHEUS_ADMIN_USER }}
+          PROMETHEUS_ADMIN_PASSWORD: ${{ secrets.PROMETHEUS_ADMIN_PASSWORD }}
+          PROMETHEUS_PUBLIC_HOSTNAME: ${{ vars.PROMETHEUS_PUBLIC_HOSTNAME }}
+          PUBLIC_DNS_DOMAIN: ${{ vars.PUBLIC_DNS_DOMAIN }}
         run: |
           set -euo pipefail
           command -v helm

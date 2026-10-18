@@ -83,15 +83,26 @@ jobs:
       - name: Helmfile diff
         env:
           HELM_DIFF_OUTPUT: simple
+          ACM_CERTIFICATE_ARN: ${{ vars.ACM_CERTIFICATE_ARN }}
+          ARGOCD_PUBLIC_HOSTNAME: ${{ vars.ARGOCD_PUBLIC_HOSTNAME }}
+          ARGOCD_ADMIN_PASSWORD: ${{ secrets.ARGOCD_ADMIN_PASSWORD }}
+          ARGOCD_ADMIN_PASSWORD_MTIME: ${{ secrets.ARGOCD_ADMIN_PASSWORD_MTIME }}
+          GRAFANA_ADMIN_USER: ${{ vars.GRAFANA_ADMIN_USER }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+          GRAFANA_PUBLIC_HOSTNAME: ${{ vars.GRAFANA_PUBLIC_HOSTNAME }}
+          PROMETHEUS_ADMIN_USER: ${{ vars.PROMETHEUS_ADMIN_USER }}
+          PROMETHEUS_ADMIN_PASSWORD: ${{ secrets.PROMETHEUS_ADMIN_PASSWORD }}
+          PROMETHEUS_PUBLIC_HOSTNAME: ${{ vars.PROMETHEUS_PUBLIC_HOSTNAME }}
+          PUBLIC_DNS_DOMAIN: ${{ vars.PUBLIC_DNS_DOMAIN }}
         run: |
           set -euo pipefail
           command -v helm
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff | tee plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff --suppress-secrets | tee plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
 
       - name: Add plan to summary
         run: |
