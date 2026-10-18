@@ -24,6 +24,7 @@ jobs:
 
   dev-plan:
     uses: ./.github/workflows/plan-template.yaml
+    secrets: inherit
     needs: detect-changes
     if: needs.detect-changes.outputs.dev == 'true'
     with:
@@ -31,6 +32,7 @@ jobs:
 
   prod-plan:
     uses: ./.github/workflows/plan-template.yaml
+    secrets: inherit
     needs: detect-changes
     if: needs.detect-changes.outputs.prod == 'true'
     with:

@@ -34,6 +34,25 @@ releases:
           replicas: 1
           service:
             type: ClusterIP
+          adminUser: {{ requiredEnv "GRAFANA_ADMIN_USER" | quote }}
+          adminPassword: {{ requiredEnv "GRAFANA_ADMIN_PASSWORD" | quote }}
+          ingress:
+            enabled: true
+            ingressClassName: alb
+            annotations:
+              alb.ingress.kubernetes.io/group.name: prometheus-stack
+              alb.ingress.kubernetes.io/group.order: "10"
+              alb.ingress.kubernetes.io/scheme: internet-facing
+              alb.ingress.kubernetes.io/target-type: ip
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+              alb.ingress.kubernetes.io/ssl-redirect: "443"
+              alb.ingress.kubernetes.io/backend-protocol: HTTP
+              alb.ingress.kubernetes.io/certificate-arn: {{ requiredEnv "ACM_CERTIFICATE_ARN" | quote }}
+              external-dns.kubernetes.io/hostname: {{ requiredEnv "GRAFANA_PUBLIC_HOSTNAME" }}
+            hosts:
+              - {{ requiredEnv "GRAFANA_PUBLIC_HOSTNAME" | quote }}
+            path: /
+            pathType: Prefix
           persistence:
             enabled: true
             type: pvc
@@ -47,9 +66,32 @@ releases:
           enabled: true
         prometheus:
           enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: alb
+            annotations:
+              alb.ingress.kubernetes.io/group.name: prometheus-stack
+              alb.ingress.kubernetes.io/group.order: "20"
+              alb.ingress.kubernetes.io/scheme: internet-facing
+              alb.ingress.kubernetes.io/target-type: ip
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+              alb.ingress.kubernetes.io/ssl-redirect: "443"
+              alb.ingress.kubernetes.io/backend-protocol: HTTP
+              alb.ingress.kubernetes.io/certificate-arn: {{ requiredEnv "ACM_CERTIFICATE_ARN" | quote }}
+              external-dns.kubernetes.io/hostname: {{ requiredEnv "PROMETHEUS_PUBLIC_HOSTNAME" }}
+            hosts:
+              - {{ requiredEnv "PROMETHEUS_PUBLIC_HOSTNAME" | quote }}
+            paths:
+              - /
+            pathType: Prefix
           prometheusSpec:
             replicas: 1
             retention: 7d
+            secrets:
+              - prometheus-web-config
+            additionalArgs:
+              - name: web.config.file
+                value: /etc/prometheus/secrets/prometheus-web-config/web.yml
             serviceMonitorSelectorNilUsesHelmValues: false
             storageSpec:
               volumeClaimTemplate:
@@ -60,3 +102,14 @@ releases:
                   resources:
                     requests:
                       storage: 20Gi
+        extraManifests:
+          - apiVersion: v1
+            kind: Secret
+            metadata:
+              name: prometheus-web-config
+              namespace: monitoring
+            type: Opaque
+            stringData:
+              web.yml: |-
+                basic_auth_users:
+                  {{ requiredEnv "PROMETHEUS_ADMIN_USER" | quote }}: {{ bcrypt (requiredEnv "PROMETHEUS_ADMIN_PASSWORD") | quote }}
