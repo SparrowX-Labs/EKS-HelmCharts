@@ -1,0 +1,49 @@
+helmDefaults:
+  wait: true
+  timeout: 300
+
+repositories:
+  - name: crossplane-stable
+    url: https://charts.crossplane.io/stable
+
+releases:
+  - name: crossplane
+    namespace: crossplane-system
+    createNamespace: true
+    chart: crossplane-stable/crossplane
+    version: 2.4.0
+    disableValidationOnInstall: true
+    values:
+      - extraObjects:
+          - apiVersion: pkg.crossplane.io/v1beta1
+            kind: DeploymentRuntimeConfig
+            metadata:
+              name: crossplane-aws-s3-runtime
+            spec:
+              serviceAccountTemplate:
+                metadata:
+                  name: provider-aws-s3
+          - apiVersion: pkg.crossplane.io/v1beta1
+            kind: DeploymentRuntimeConfig
+            metadata:
+              name: crossplane-aws-rds-runtime
+            spec:
+              serviceAccountTemplate:
+                metadata:
+                  name: provider-aws-rds
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-aws-s3
+            spec:
+              package: xpkg.crossplane.io/crossplane-contrib/provider-aws-s3:v2.0.0
+              runtimeConfigRef:
+                name: crossplane-aws-s3-runtime
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-aws-rds
+            spec:
+              package: xpkg.crossplane.io/crossplane-contrib/provider-aws-rds:v2.0.0
+              runtimeConfigRef:
+                name: crossplane-aws-rds-runtime
