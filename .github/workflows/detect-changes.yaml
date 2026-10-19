@@ -37,5 +37,6 @@ jobs:
             dev:
               - 'environments/dev/**'
               - '.github/workflows/**'
+              - 'charts/**'
             prod:
               - 'environments/prod/**'
