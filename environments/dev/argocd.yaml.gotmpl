@@ -33,6 +33,13 @@ releases:
             path: /
             pathType: Prefix
           replicas: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
         configs:
           secret:
             argocdServerAdminPassword: {{ requiredEnv "ARGOCD_ADMIN_PASSWORD_HASH" | quote }}
@@ -45,5 +52,20 @@ releases:
           replicas: 1
         applicationSet:
           replicas: 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+        notifications:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
         redis-ha:
           enabled: false
