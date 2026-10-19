@@ -103,3 +103,18 @@ releases:
     values:
       - crds:
           enabled: true
+
+  - name: storage-classes
+    namespace: kube-system
+    chart: ../../charts/storage-classes
+    values:
+      - storageClasses:
+          - name: gp3
+            annotations:
+              storageclass.kubernetes.io/is-default-class: "true"
+            provisioner: ebs.csi.aws.com
+            volumeBindingMode: WaitForFirstConsumer
+            allowVolumeExpansion: true
+            parameters:
+              type: gp3
+              encrypted: "true"
