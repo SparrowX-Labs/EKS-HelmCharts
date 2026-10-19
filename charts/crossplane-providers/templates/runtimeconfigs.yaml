@@ -15,3 +15,21 @@ spec:
   serviceAccountTemplate:
     metadata:
       name: provider-aws-rds
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: crossplane-aws-ec2-runtime
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-aws-ec2
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: crossplane-aws-secretsmanager-runtime
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-aws-secretsmanager
