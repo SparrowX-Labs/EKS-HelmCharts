@@ -96,9 +96,9 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml sync | tee apply.txt
+          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml.gotmpl sync | tee apply.txt
           helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl sync | tee -a apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml sync | tee -a apply.txt
+          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml.gotmpl sync | tee -a apply.txt
           helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl sync | tee -a apply.txt
           helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl sync | tee -a apply.txt
 
