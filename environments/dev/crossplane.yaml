@@ -17,5 +17,6 @@ releases:
   - name: crossplane-providers
     namespace: crossplane-system
     chart: ../../charts/crossplane-providers
+    disableValidation: true
     needs:
       - crossplane-system/crossplane
