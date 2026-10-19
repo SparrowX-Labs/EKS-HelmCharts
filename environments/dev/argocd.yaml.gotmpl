@@ -35,7 +35,7 @@ releases:
           replicas: 1
         configs:
           secret:
-            argocdServerAdminPassword: {{ bcrypt (requiredEnv "ARGOCD_ADMIN_PASSWORD") | quote }}
+            argocdServerAdminPassword: {{ requiredEnv "ARGOCD_ADMIN_PASSWORD_HASH" | quote }}
             argocdServerAdminPasswordMtime: {{ requiredEnv "ARGOCD_ADMIN_PASSWORD_MTIME" | quote }}
           params:
             server.insecure: true

@@ -26,6 +26,7 @@ releases:
       - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" | quote }}
         region: {{ requiredEnv "AWS_REGION" | quote }}
         vpcId: {{ requiredEnv "EKS_VPC_ID" | quote }}
+        keepTLSSecret: true
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
