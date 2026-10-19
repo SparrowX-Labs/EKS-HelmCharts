@@ -85,7 +85,7 @@ jobs:
           HELM_DIFF_OUTPUT: simple
           ACM_CERTIFICATE_ARN: ${{ vars.ACM_CERTIFICATE_ARN }}
           ARGOCD_PUBLIC_HOSTNAME: ${{ vars.ARGOCD_PUBLIC_HOSTNAME }}
-          ARGOCD_ADMIN_PASSWORD: ${{ secrets.ARGOCD_ADMIN_PASSWORD }}
+          ARGOCD_ADMIN_PASSWORD_HASH: ${{ secrets.ARGOCD_ADMIN_PASSWORD_HASH }}
           ARGOCD_ADMIN_PASSWORD_MTIME: ${{ secrets.ARGOCD_ADMIN_PASSWORD_MTIME }}
           GRAFANA_ADMIN_USER: ${{ vars.GRAFANA_ADMIN_USER }}
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
@@ -98,9 +98,9 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml diff --suppress-secrets | tee plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml.gotmpl diff --suppress-secrets | tee plan.txt
           helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml diff --suppress-secrets | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
           helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
           helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
 
