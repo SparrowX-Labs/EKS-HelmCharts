@@ -29,6 +29,10 @@ releases:
         serviceAccount:
           create: true
           name: aws-load-balancer-controller
+        controllerConfig:
+          featureGates:
+            ALBGatewayAPI: true
+            NLBGatewayAPI: true
 
   - name: external-dns
     namespace: external-dns
