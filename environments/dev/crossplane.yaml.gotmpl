@@ -6,6 +6,9 @@ repositories:
   - name: crossplane-stable
     url: https://charts.crossplane.io/stable
 
+  - name: crossview
+    url: https://crossplane-contrib.github.io/crossview
+
 releases:
   - name: crossplane
     namespace: crossplane-system
@@ -20,3 +23,22 @@ releases:
     disableValidation: true
     needs:
       - crossplane-system/crossplane
+
+  - name: crossview
+    namespace: crossview
+    createNamespace: true
+    chart: crossview/crossview
+    version: 4.6.0
+    needs:
+      - crossplane-system/crossplane-providers
+    values:
+      - database:
+          enabled: false
+        config:
+          server:
+            auth:
+              mode: none
+        service:
+          type: ClusterIP
+        ingress:
+          enabled: false
