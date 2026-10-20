@@ -8,6 +8,7 @@ on:
     paths:
       - "environments/**"
       - ".github/workflows/**"
+      - "charts/**"
 
 permissions:
   id-token: write
