@@ -33,3 +33,21 @@ spec:
   serviceAccountTemplate:
     metadata:
       name: provider-aws-secretsmanager
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: crossplane-aws-ecr-runtime
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-aws-ecr
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: crossplane-aws-route53-runtime
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-aws-route53
