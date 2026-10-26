@@ -45,8 +45,9 @@ releases:
             targetPort: web
             expose:
               default: true
-            tls:
-              enabled: false
+            http:
+              tls:
+                enabled: false
         service:
           enabled: true
           annotations:
