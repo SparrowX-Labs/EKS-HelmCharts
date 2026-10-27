@@ -112,13 +112,30 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml.gotmpl sync | tee apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl sync | tee -a apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/traefik.yaml.gotmpl diff --suppress-secrets | tee plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml.gotmpl sync | tee -a apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl sync | tee -a apply.txt
-          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl sync | tee -a apply.txt
 
+          ENV_DIR="environments/${{ inputs.target-env }}"
+
+          run_sync() {
+            local file="$1"
+
+            if grep -qE '^[[:space:]]*-[[:space:]]+name:' "$file"; then
+              echo "Applying $file"
+              helmfile -f "$file" sync | tee -a apply.txt
+            else
+              echo "Skipping $file (no releases)"
+            fi
+          }
+
+          : > apply.txt
+
+          run_sync "$ENV_DIR/gateway-api.yaml.gotmpl"
+          run_sync "$ENV_DIR/main-eks-systems.yaml.gotmpl"
+          run_sync "$ENV_DIR/traefik.yaml.gotmpl"
+          run_sync "$ENV_DIR/crossplane.yaml.gotmpl"
+          run_sync "$ENV_DIR/argocd.yaml.gotmpl"
+          run_sync "$ENV_DIR/monitoring.yaml.gotmpl"
+          run_sync "$ENV_DIR/istio.yaml.gotmpl"
+              
       - name: Add apply to summary
         run: |
           {
