@@ -1,0 +1,100 @@
+# helmDefaults:
+#   wait: true
+#   timeout: 300
+
+# repositories:
+#   - name: argo
+#     url: https://argoproj.github.io/argo-helm
+
+# releases:
+#   - name: argocd
+#     namespace: argocd
+#     createNamespace: true
+#     chart: argo/argo-cd
+#     version: 10.10.5
+#     values:
+#       - server:
+#           service:
+#             type: ClusterIP
+#           ingress:
+#             enabled: true
+#             ingressClassName: alb
+#             annotations:
+#               alb.ingress.kubernetes.io/group.name: argocd
+#               alb.ingress.kubernetes.io/group.order: "10"
+#               alb.ingress.kubernetes.io/scheme: internet-facing
+#               alb.ingress.kubernetes.io/target-type: ip
+#               alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+#               alb.ingress.kubernetes.io/ssl-redirect: "443"
+#               alb.ingress.kubernetes.io/backend-protocol: HTTP
+#               alb.ingress.kubernetes.io/certificate-arn: {{ requiredEnv "ACM_CERTIFICATE_ARN" | quote }}
+#               external-dns.kubernetes.io/hostname: {{ requiredEnv "ARGOCD_PUBLIC_HOSTNAME" }}
+#             hostname: {{ requiredEnv "ARGOCD_PUBLIC_HOSTNAME" | quote }}
+#             path: /
+#             pathType: Prefix
+#           replicas: 2
+#           affinity:
+#             podAntiAffinity:
+#               requiredDuringSchedulingIgnoredDuringExecution:
+#                 - topologyKey: kubernetes.io/hostname
+#                   labelSelector:
+#                     matchLabels:
+#                       app.kubernetes.io/name: argocd-server
+#           resources:
+#             requests:
+#               cpu: 100m
+#               memory: 128Mi
+#             limits:
+#               cpu: 500m
+#               memory: 512Mi
+#         configs:
+#           secret:
+#             argocdServerAdminPassword: {{ requiredEnv "ARGOCD_ADMIN_PASSWORD_HASH" | quote }}
+#             argocdServerAdminPasswordMtime: {{ requiredEnv "ARGOCD_ADMIN_PASSWORD_MTIME" | quote }}
+#           params:
+#             server.insecure: true
+#         repoServer:
+#           replicas: 2
+#           affinity:
+#             podAntiAffinity:
+#               requiredDuringSchedulingIgnoredDuringExecution:
+#                 - topologyKey: kubernetes.io/hostname
+#                   labelSelector:
+#                     matchLabels:
+#                       app.kubernetes.io/name: argocd-repo-server
+#         controller:
+#           replicas: 1
+#         applicationSet:
+#           replicas: 2
+#           affinity:
+#             podAntiAffinity:
+#               requiredDuringSchedulingIgnoredDuringExecution:
+#                 - topologyKey: kubernetes.io/hostname
+#                   labelSelector:
+#                     matchLabels:
+#                       app.kubernetes.io/name: argocd-applicationset-controller
+#           resources:
+#             requests:
+#               cpu: 50m
+#               memory: 64Mi
+#             limits:
+#               cpu: 250m
+#               memory: 256Mi
+#         notifications:
+#           replicas: 2
+#           affinity:
+#             podAntiAffinity:
+#               requiredDuringSchedulingIgnoredDuringExecution:
+#                 - topologyKey: kubernetes.io/hostname
+#                   labelSelector:
+#                     matchLabels:
+#                       app.kubernetes.io/name: argocd-notifications-controller
+#           resources:
+#             requests:
+#               cpu: 50m
+#               memory: 64Mi
+#             limits:
+#               cpu: 250m
+#               memory: 256Mi
+#         redis-ha:
+#           enabled: false

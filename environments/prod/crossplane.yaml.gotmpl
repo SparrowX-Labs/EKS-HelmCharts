@@ -1,0 +1,44 @@
+# helmDefaults:
+#   wait: true
+#   timeout: 300
+
+# repositories:
+#   - name: crossplane-stable
+#     url: https://charts.crossplane.io/stable
+
+#   - name: crossview
+#     url: https://crossplane-contrib.github.io/crossview
+
+# releases:
+#   - name: crossplane
+#     namespace: crossplane-system
+#     createNamespace: true
+#     chart: crossplane-stable/crossplane
+#     version: 2.4.0
+#     disableValidationOnInstall: true
+
+#   - name: crossplane-providers
+#     namespace: crossplane-system
+#     chart: ../../charts/crossplane-providers
+#     disableValidation: true
+#     needs:
+#       - crossplane-system/crossplane
+
+#   - name: crossview
+#     namespace: crossview
+#     createNamespace: true
+#     chart: crossview/crossview
+#     version: 4.6.0
+#     needs:
+#       - crossplane-system/crossplane-providers
+#     values:
+#       - database:
+#           enabled: false
+#         config:
+#           server:
+#             auth:
+#               mode: none
+#         service:
+#           type: ClusterIP
+#         ingress:
+#           enabled: false

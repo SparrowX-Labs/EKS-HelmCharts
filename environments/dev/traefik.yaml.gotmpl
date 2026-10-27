@@ -1,0 +1,58 @@
+helmDefaults:
+  wait: true
+  timeout: 300
+
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+
+releases:
+  - name: traefik
+    namespace: traefik
+    createNamespace: true
+    chart: traefik/traefik
+    version: 42.1.3
+    values:
+      - providers:
+          kubernetesIngress:
+            enabled: false
+          kubernetesGateway:
+            enabled: true
+            statusAddress:
+              service:
+                enabled: true
+                name: traefik
+                namespace: traefik
+        gateway:
+          enabled: false
+        gatewayClass:
+          enabled: false
+        ports:
+          web:
+            port: 80
+            exposedPort: 80
+            expose:
+              default: true
+          websecure:
+            # TLS terminates at the AWS NLB. The decrypted HTTP request is
+            # forwarded to Traefik's existing web entrypoint on port 80.
+            port: 8443
+            exposedPort: 443
+            targetPort: web
+            expose:
+              default: true
+            http:
+              tls:
+                enabled: false
+        service:
+          enabled: true
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-type: external
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+            service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+            service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ requiredEnv "ACM_CERTIFICATE_ARN" | quote }}
+            service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+            service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+          spec:
+            type: LoadBalancer
+            loadBalancerClass: service.k8s.aws/nlb
