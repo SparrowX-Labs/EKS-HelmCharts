@@ -113,13 +113,15 @@ jobs:
           command -v helmfile
           helm version --short
           helmfile --version
-          helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml.gotmpl diff --suppress-secrets | tee plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/traefik.yaml.gotmpl diff --suppress-secrets | tee plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
-          helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
 
+          for file in environments/${{ inputs.target-env }}/*.yaml.gotmpl; do
+            if grep -qE '^[[:space:]]*-[[:space:]]+name:' "$file"; then
+              echo "Processing $file"
+              helmfile -f "$file" diff --suppress-secrets | tee -a plan.txt
+            else
+              echo "Skipping $file (no releases)"
+            fi
+          done
       - name: Add plan to summary
         run: |
           {
