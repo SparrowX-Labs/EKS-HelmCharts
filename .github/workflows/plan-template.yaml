@@ -114,14 +114,29 @@ jobs:
           helm version --short
           helmfile --version
 
-          for file in environments/${{ inputs.target-env }}/*.yaml.gotmpl; do
+          ENV_DIR="environments/${{ inputs.target-env }}"
+
+          run_diff() {
+            local file="$1"
+
             if grep -qE '^[[:space:]]*-[[:space:]]+name:' "$file"; then
               echo "Processing $file"
               helmfile -f "$file" diff --suppress-secrets | tee -a plan.txt
             else
               echo "Skipping $file (no releases)"
             fi
-          done
+          } 
+          
+          : > plan.txt
+
+          run_diff "$ENV_DIR/gateway-api.yaml.gotmpl"
+          run_diff "$ENV_DIR/main-eks-systems.yaml.gotmpl"
+          run_diff "$ENV_DIR/traefik.yaml.gotmpl"
+          run_diff "$ENV_DIR/crossplane.yaml.gotmpl"
+          run_diff "$ENV_DIR/argocd.yaml.gotmpl"
+          run_diff "$ENV_DIR/monitoring.yaml.gotmpl"
+          run_diff "$ENV_DIR/istio.yaml.gotmpl"
+
       - name: Add plan to summary
         run: |
           {
