@@ -36,11 +36,31 @@ jobs:
 
           if [[ "$TARGET_ENV" == "dev" ]]; then
             EKS_CLUSTER_NAME="$DEV_EKS_CLUSTER_NAME"
+
+            ACM_CERTIFICATE_ARN=${{ vars.DEV_ACM_CERTIFICATE_ARN }}
+            PUBLIC_DNS_DOMAIN=${{ vars.DEV_PUBLIC_DNS_DOMAIN }}
+            ARGOCD_PUBLIC_HOSTNAME=${{ vars.DEV_ARGOCD_PUBLIC_HOSTNAME }}
+            GRAFANA_PUBLIC_HOSTNAME=${{ vars.DEV_GRAFANA_PUBLIC_HOSTNAME }}
+            PROMETHEUS_PUBLIC_HOSTNAME=${{ vars.DEV_PROMETHEUS_PUBLIC_HOSTNAME }}
+
           else
             EKS_CLUSTER_NAME="$PROD_EKS_CLUSTER_NAME"
+
+            ACM_CERTIFICATE_ARN=${{ vars.PROD_ACM_CERTIFICATE_ARN }}
+            PUBLIC_DNS_DOMAIN=${{ vars.PROD_PUBLIC_DNS_DOMAIN }}
+            ARGOCD_PUBLIC_HOSTNAME=${{ vars.PROD_ARGOCD_PUBLIC_HOSTNAME }}
+            GRAFANA_PUBLIC_HOSTNAME=${{ vars.PROD_GRAFANA_PUBLIC_HOSTNAME }}
+            PROMETHEUS_PUBLIC_HOSTNAME=${{ vars.PROD_PROMETHEUS_PUBLIC_HOSTNAME }}
+
           fi
 
           echo "EKS_CLUSTER_NAME=$EKS_CLUSTER_NAME" >> "$GITHUB_ENV"
+
+          echo "ACM_CERTIFICATE_ARN=$ACM_CERTIFICATE_ARN" >> "$GITHUB_ENV"
+          echo "PUBLIC_DNS_DOMAIN=$PUBLIC_DNS_DOMAIN" >> "$GITHUB_ENV"
+          echo "ARGOCD_PUBLIC_HOSTNAME=$ARGOCD_PUBLIC_HOSTNAME" >> "$GITHUB_ENV"
+          echo "GRAFANA_PUBLIC_HOSTNAME=$GRAFANA_PUBLIC_HOSTNAME" >> "$GITHUB_ENV"
+          echo "PROMETHEUS_PUBLIC_HOSTNAME=$PROMETHEUS_PUBLIC_HOSTNAME" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,15 +103,10 @@ jobs:
       - name: Helmfile diff
         env:
           HELM_DIFF_OUTPUT: simple
-          ACM_CERTIFICATE_ARN: ${{ vars.ACM_CERTIFICATE_ARN }}
-          ARGOCD_PUBLIC_HOSTNAME: ${{ vars.ARGOCD_PUBLIC_HOSTNAME }}
           ARGOCD_ADMIN_PASSWORD_HASH: ${{ secrets.ARGOCD_ADMIN_PASSWORD_HASH }}
           ARGOCD_ADMIN_PASSWORD_MTIME: ${{ secrets.ARGOCD_ADMIN_PASSWORD_MTIME }}
           GRAFANA_ADMIN_USER: ${{ vars.GRAFANA_ADMIN_USER }}
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
-          GRAFANA_PUBLIC_HOSTNAME: ${{ vars.GRAFANA_PUBLIC_HOSTNAME }}
-          PROMETHEUS_PUBLIC_HOSTNAME: ${{ vars.PROMETHEUS_PUBLIC_HOSTNAME }}
-          PUBLIC_DNS_DOMAIN: ${{ vars.PUBLIC_DNS_DOMAIN }}
         run: |
           set -euo pipefail
           command -v helm
@@ -100,6 +115,7 @@ jobs:
           helmfile --version
           helmfile -f environments/${{ inputs.target-env }}/gateway-api.yaml.gotmpl diff --suppress-secrets | tee plan.txt
           helmfile -f environments/${{ inputs.target-env }}/main-eks-systems.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
+          helmfile -f environments/${{ inputs.target-env }}/traefik.yaml.gotmpl diff --suppress-secrets | tee plan.txt
           helmfile -f environments/${{ inputs.target-env }}/crossplane.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
           helmfile -f environments/${{ inputs.target-env }}/argocd.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
           helmfile -f environments/${{ inputs.target-env }}/monitoring.yaml.gotmpl diff --suppress-secrets | tee -a plan.txt
